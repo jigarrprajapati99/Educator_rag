@@ -36,6 +36,15 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # Generate JWT Token
-    access_token = create_access_token(data={"sub": user["email"]})
+    # --- THIS IS THE FIX ---
+    # Safely pack the ID, Email, and Name into the token payload
+    payload_data = {
+        "sub": str(user["_id"]),   
+        "email": user["email"],
+        "name": user["name"]
+    }
+    
+    # Generate JWT Token using the new payload
+    access_token = create_access_token(data=payload_data)
+    
     return {"access_token": access_token, "token_type": "bearer"}

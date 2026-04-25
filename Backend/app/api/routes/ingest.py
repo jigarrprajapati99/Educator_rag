@@ -1,6 +1,8 @@
 import os
 import shutil
+import uuid
 from datetime import datetime, timezone
+from bson import ObjectId
 from fastapi import APIRouter, UploadFile, HTTPException, Depends
 from app.schemas.ingest import IngestResponse
 from app.services.rag.engine import rag_engine
@@ -30,17 +32,23 @@ async def ingest_documents(files: list[UploadFile], current_email: str = Depends
 
     for file in files:
         temp_file_path = f"temp_{file.filename}"
+        
+        # 1. Generate the ID here
+        doc_id = str(uuid.uuid4())
+        
         with open(temp_file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
             
         try:
-            chunks_added = rag_engine.ingest_pdf(temp_file_path)
+            # 2. Pass the ID directly to Pinecone
+            chunks_added = rag_engine.ingest_pdf(temp_file_path, doc_id)
             total_chunks_added += chunks_added
             
-            # Save Document Info to MongoDB
+            # 3. Save the EXACT SAME ID to MongoDB
             await documents_collection.insert_one({
                 "user_id": str(user["_id"]),
                 "filename": file.filename,
+                "doc_id": doc_id, 
                 "chunks": chunks_added,
                 "uploaded_at": datetime.now(timezone.utc)
             })
@@ -49,3 +57,20 @@ async def ingest_documents(files: list[UploadFile], current_email: str = Depends
                 os.remove(temp_file_path)
 
     return {"status": "success", "chunks_stored": total_chunks_added}
+
+@router.delete("/{mongo_id}")
+async def delete_document(mongo_id: str, current_email: str = Depends(get_current_user_email)):
+    user = await users_collection.find_one({"email": current_email})
+    
+    doc = await documents_collection.find_one({"_id": ObjectId(mongo_id), "user_id": str(user["_id"])})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+        
+    if "doc_id" in doc and "chunks" in doc:
+        # Delete from Pinecone
+        rag_engine.delete_document(doc["doc_id"], doc["chunks"])
+    
+    # Delete from MongoDB
+    await documents_collection.delete_one({"_id": ObjectId(mongo_id)})
+    
+    return {"status": "deleted successfully"}

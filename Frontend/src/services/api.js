@@ -73,3 +73,8 @@ export const deleteSession = async (sessionId) => {
     const response = await api.delete(`/session/${sessionId}`);
     return response.data;
 };
+
+export const deleteDocument = async (id) => {
+    const response = await api.delete(`/ingest/${id}`);
+    return response.data;
+};
