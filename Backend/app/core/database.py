@@ -10,3 +10,5 @@ client = AsyncIOMotorClient(MONGO_URL)
 # Create a database named 'educator_rag' and a collection named 'users'
 db = client.educator_rag
 users_collection = db.users
+sessions_collection = db.sessions
+documents_collection = db.documents

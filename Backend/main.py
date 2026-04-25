@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import chat, ingest,auth
+from app.api.routes import chat, ingest,auth ,session
 
 app = FastAPI(
     title="Educator RAG API",
@@ -20,6 +20,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(chat.router, prefix="/chat", tags=["Chat"])
 app.include_router(ingest.router, prefix="/ingest", tags=["Ingestion"])
+app.include_router(session.router, prefix="/session", tags=["Sessions"])
 
 @app.get("/health", tags=["Health"])
 def health_check():

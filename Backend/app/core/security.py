@@ -4,6 +4,10 @@ import jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # Configuration
 SECRET_KEY = os.getenv("JWT_SECRET", "fallback_secret")
