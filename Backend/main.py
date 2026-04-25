@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import chat, ingest
+from app.api.routes import chat, ingest,auth
 
 app = FastAPI(
     title="Educator RAG API",
@@ -17,6 +17,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(chat.router, prefix="/chat", tags=["Chat"])
 app.include_router(ingest.router, prefix="/ingest", tags=["Ingestion"])
 

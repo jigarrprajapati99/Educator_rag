@@ -1,12 +1,16 @@
 import time
-from fastapi import APIRouter
+from fastapi import APIRouter , Depends
+from app.core.security import get_current_user_email
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.services.rag.engine import rag_engine
 
 router = APIRouter()
 
 @router.post("/", response_model=ChatResponse)
-async def chat_endpoint(request: ChatRequest):
+async def chat_endpoint(
+    request: ChatRequest, 
+    current_user: str = Depends(get_current_user_email) # <--- THIS LOCKS THE ROUTE
+):
     start_time = time.time()
     
     # 1. Retrieve Context

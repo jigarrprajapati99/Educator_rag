@@ -9,3 +9,7 @@ python-dotenv
 python-multipart
 pinecone-client
 openai
+motor 
+passlib[bcrypt] 
+pyjwt 
+python-multipart
