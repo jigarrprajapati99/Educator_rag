@@ -1,37 +1,50 @@
 import axios from 'axios';
 
-// This points to your FastAPI server
 const API_URL = 'http://localhost:8000';
 
-export const chatWithAI = async (query) => {
-    try {
-        const response = await axios.post(`${API_URL}/chat/`, {
-            query: query,
-            top_k: 3
-        });
-        return response.data;
-    } catch (error) {
-        console.error("Error in chat:", error);
-        throw error;
+// Create an Axios instance
+const api = axios.create({
+    baseURL: API_URL,
+});
+
+// Automatically attach the JWT token to every request
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
     }
+    return config;
+});
+
+// --- AUTHENTICATION ROUTES ---
+export const loginUser = async (email, password) => {
+    // FastAPI's OAuth2 expects form data with 'username' and 'password'
+    const formData = new FormData();
+    formData.append('username', email); 
+    formData.append('password', password);
+
+    const response = await api.post('/auth/login', formData);
+    return response.data;
+};
+
+export const signupUser = async (name, email, password) => {
+    const response = await api.post('/auth/signup', { name, email, password });
+    return response.data;
+};
+
+// --- RAG ROUTES ---
+export const chatWithAI = async (query) => {
+    const response = await api.post('/chat/', { query: query, top_k: 3 });
+    return response.data;
 };
 
 export const uploadDocuments = async (files) => {
     const formData = new FormData();
-    // Loop through the selected files and append them to the form data
     for (let i = 0; i < files.length; i++) {
         formData.append('files', files[i]);
     }
-
-    try {
-        const response = await axios.post(`${API_URL}/ingest/`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        return response.data;
-    } catch (error) {
-        console.error("Error uploading documents:", error);
-        throw error;
-    }
+    const response = await api.post('/ingest/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
 };

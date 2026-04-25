@@ -1,8 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { chatWithAI, uploadDocuments } from './services/api';
-import { Send, Paperclip, FileText, Plus, BookOpen, ChevronRight, Loader2, Bot, User } from 'lucide-react';
+import { Send, Paperclip, FileText, Plus, BookOpen, ChevronRight, Loader2, Bot, User, LogOut } from 'lucide-react';
+import useAuthStore from './store/useAuthStore';
+import Auth from './components/Auth';
 
 export default function App() {
+  const { user, logout } = useAuthStore();
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -14,6 +18,11 @@ export default function App() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  // If the user is not logged in, render the Auth screen
+  if (!user) {
+    return <Auth />;
+  }
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -59,6 +68,7 @@ export default function App() {
       
       {/* 🖤 SIDEBAR (Black Theme) */}
       <div className="w-64 bg-[#0D0D0D] text-[#EAEAEA] flex flex-col border-r border-[#1f1f1f] flex-shrink-0">
+        
         {/* Header */}
         <div className="p-5 border-b border-[#1f1f1f] flex items-center gap-3">
           <div className="bg-blue-600 p-2 rounded-lg">
@@ -98,10 +108,26 @@ export default function App() {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-[#1f1f1f] text-xs text-gray-500">
-          <p>System Status: <span className="text-green-500">Online</span></p>
+        {/* --- USER PROFILE FOOTER --- */}
+        <div className="p-4 border-t border-[#1f1f1f] flex items-center justify-between">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-8 h-8 rounded-full bg-blue-900 text-blue-300 flex items-center justify-center font-bold text-sm flex-shrink-0">
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
+            </div>
+            <div className="flex flex-col truncate">
+              <span className="text-sm font-medium text-white truncate">{user?.name}</span>
+              <span className="text-xs text-gray-500 truncate">{user?.email}</span>
+            </div>
+          </div>
+          <button 
+            onClick={logout} 
+            className="text-gray-500 hover:text-red-400 p-2 transition-colors flex-shrink-0"
+            title="Log out"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
+
       </div>
 
       {/* 🤍 MAIN CHAT AREA (White Theme) */}
@@ -114,7 +140,7 @@ export default function App() {
             {messages.length === 0 && (
               <div className="text-center text-gray-400 mt-20 flex flex-col items-center animate-fade-in">
                 <BookOpen size={48} className="text-blue-100 mb-4" />
-                <h2 className="text-xl font-medium text-gray-700">Ready to Learn?</h2>
+                <h2 className="text-xl font-medium text-gray-700">Welcome, {user?.name}!</h2>
                 <p className="mt-2 text-sm max-w-sm text-gray-500">Upload your course materials to the knowledge base and ask me anything to get started.</p>
               </div>
             )}
