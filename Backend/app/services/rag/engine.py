@@ -55,7 +55,7 @@ class RAGService:
         for i in range(0, len(vector_ids), batch_size):
             self.index.delete(ids=vector_ids[i:i + batch_size])
 
-    def search(self, query: str, top_k: int = 3) -> list[str]:
+    def search(self, query: str, top_k: int = 5) -> list[str]:
         query_embedding = list(self.model.embed([query]))[0].tolist()
 
         response = self.index.query(

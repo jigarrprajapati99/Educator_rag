@@ -13,3 +13,8 @@ motor
 passlib[bcrypt] 
 pyjwt 
 python-multipart
+ragas 
+datasets 
+pandas 
+langchain-groq 
+langchain-community
