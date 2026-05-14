@@ -20,7 +20,7 @@ async def chat_endpoint(
     
     # 1. Retrieve Context & Generate Answer
     context = rag_engine.search(request.query, top_k=request.top_k)
-    answer = rag_engine.generate_answer(request.query, context)
+    answer = await rag_engine.generate_answer(request.query, context)
     query_time = round(time.time() - start_time, 4)
 
     # 2. Format the new messages for MongoDB

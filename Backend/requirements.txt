@@ -18,5 +18,10 @@ datasets
 pandas 
 langchain-groq 
 langchain-community
-# Add this line
 google-genai
+# --- Add the following LlamaIndex dependencies ---
+llama-index-llms-google-genai 
+llama-index-embeddings-google-genai 
+google-genai
+llama-index-core
+llama-index-vector-stores-pinecone

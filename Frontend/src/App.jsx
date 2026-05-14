@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { chatWithAI, uploadDocuments, getSessions, getSessionDetails, deleteSession, renameSession, getDocuments, deleteDocument } from './services/api'; 
 import useAuthStore from './store/useAuthStore';
 import Auth from './components/Auth';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Send, Paperclip, FileText, Plus, BookOpen, ChevronRight, Loader2, Bot, User, LogOut, MessageSquare, Trash2, Pencil, Check, X } from 'lucide-react';
 
 export default function App() {
@@ -269,9 +271,10 @@ export default function App() {
       </div>
 
       {/* 🤍 MAIN CHAT AREA */}
-      <div className="flex-1 flex flex-col relative bg-white">
+      <div className="flex-1 flex flex-col bg-white min-w-0">
         
-        <div className="flex-1 overflow-y-auto p-6 md:p-10 pb-32">
+        {/* Scrollable messages area */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-10">
           <div className="max-w-3xl mx-auto space-y-8">
             
             {messages.length === 0 && (
@@ -285,13 +288,21 @@ export default function App() {
             {messages.map((msg, index) => (
               <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
                 <div className={`flex gap-4 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.role === 'user' ? 'bg-gray-200' : 'bg-blue-100 text-blue-600'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 ${msg.role === 'user' ? 'bg-gray-200' : 'bg-blue-100 text-blue-600'}`}>
                     {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <div className={`p-4 text-[15px] leading-relaxed ${msg.role === 'user' ? 'bg-[#F5F5F5] text-black rounded-2xl rounded-tr-sm' : 'bg-white text-black border border-gray-100 rounded-2xl rounded-tl-sm shadow-sm'}`}>
-                      {msg.content}
-                    </div>
+                  <div className="flex flex-col gap-2 min-w-0">
+                    {msg.role === 'user' ? (
+                      <div className="p-4 text-[15px] leading-relaxed bg-[#F5F5F5] text-black rounded-2xl rounded-tr-sm">
+                        {msg.content}
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-white text-black border border-gray-100 rounded-2xl rounded-tl-sm shadow-sm">
+                        <div className="prose prose-sm prose-gray max-w-none prose-headings:text-gray-800 prose-headings:font-semibold prose-p:text-gray-700 prose-p:leading-relaxed prose-strong:text-gray-800 prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-normal prose-code:before:content-none prose-code:after:content-none prose-pre:bg-[#1e1e1e] prose-pre:text-gray-100 prose-pre:rounded-lg prose-pre:shadow-inner prose-ul:text-gray-700 prose-ol:text-gray-700 prose-li:text-gray-700 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-blue-300 prose-blockquote:text-gray-600 prose-table:text-sm prose-th:bg-gray-50 prose-th:text-gray-700 prose-td:text-gray-600">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                        </div>
+                      </div>
+                    )}
                     {msg.context && msg.context.length > 0 && (
                       <details className="mt-1 group">
                         <summary className="flex items-center gap-1 text-xs font-medium text-blue-600 cursor-pointer hover:underline select-none list-none">
@@ -326,8 +337,8 @@ export default function App() {
           </div>
         </div>
 
-        {/* ⌨️ INPUT BOX */}
-        <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-white via-white to-transparent pt-10 pb-6 px-6">
+        {/* ⌨️ INPUT BOX — static at bottom, never overlaps */}
+        <div className="flex-shrink-0 border-t border-gray-100 bg-white px-6 pt-4 pb-5">
           <div className="max-w-3xl mx-auto relative shadow-[0_8px_30px_rgb(0,0,0,0.08)] rounded-xl bg-white border border-gray-200 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
             <input
               type="text"
