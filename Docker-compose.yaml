@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./Backend/.env
+    environment:
+      # This ensures the container looks for the file inside its own /app directory
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/educator-ai-496108-c61ee5160f94.json
+    volumes:
+      - ./Backend:/app
+    restart: always
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile # Assumes a React/Vite Dockerfile in the root
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: always
