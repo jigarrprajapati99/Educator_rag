@@ -1,3 +1,5 @@
+# pyrefly: ignore [missing-import]
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import chat, ingest,auth ,session
@@ -27,5 +29,4 @@ def health_check():
     return {"status": "healthy", "message": "API Gateway is running"}
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="localhost", port=8000)

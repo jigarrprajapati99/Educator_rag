@@ -18,3 +18,5 @@ datasets
 pandas 
 langchain-groq 
 langchain-community
+# Add this line
+google-genai
